@@ -1,0 +1,2365 @@
+
+<!DOCTYPE html>
+<html lang="en" class="dark h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GAME PLAY - Mobile Friendly Mini Games Hub</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter & Orbitron for gaming UI -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            orbitron: ['Orbitron', 'sans-serif']
+          },
+          colors: {
+            neonCyan: '#00f2fe',
+            neonGreen: '#39ff14',
+            neonPurple: '#7928ca',
+            neonPink: '#ff007f',
+            darkBg: '#0b0d14',
+            darkCard: '#131722',
+            darkBorder: '#232938'
+          },
+          boxShadow: {
+            'neon-cyan': '0 0 15px rgba(0, 242, 254, 0.4), 0 0 30px rgba(0, 242, 254, 0.2)',
+            'neon-purple': '0 0 15px rgba(121, 40, 202, 0.4), 0 0 30px rgba(121, 40, 202, 0.2)',
+            'neon-pink': '0 0 15px rgba(255, 0, 127, 0.4), 0 0 30px rgba(255, 0, 127, 0.2)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    body {
+      background-color: #0b0d14;
+      color: #e2e8f0;
+      touch-action: manipulation;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0d14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #232938;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00f2fe;
+    }
+
+    /* Canvas styling */
+    canvas {
+      touch-action: none;
+      background-color: #08090e;
+      border-radius: 0.75rem;
+    }
+
+    /* Glassmorphism */
+    .glass-panel {
+      background: rgba(19, 23, 34, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0, 242, 254, 0.4);
+      box-shadow: 0 10px 30px -10px rgba(0, 242, 254, 0.3);
+    }
+
+    /* Glowing Text & Borders */
+    .text-glow-cyan {
+      text-shadow: 0 0 12px rgba(0, 242, 254, 0.6);
+    }
+
+    /* Mobile Touch Control Buttons */
+    .btn-touch {
+      touch-action: none;
+      user-select: none;
+      transition: transform 0.08s ease, background-color 0.08s ease;
+    }
+    .btn-touch:active {
+      transform: scale(0.92);
+    }
+
+    /* Joystick Area styling */
+    .joystick-base {
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(0, 242, 254, 0.4);
+      border-radius: 50%;
+      position: relative;
+    }
+    .joystick-thumb {
+      background: radial-gradient(circle, #00f2fe 0%, #0080ff 100%);
+      border-radius: 50%;
+      position: absolute;
+      box-shadow: 0 0 10px #00f2fe;
+    }
+  </style>
+</head>
+
+<body class="h-full flex flex-col font-sans bg-darkBg text-gray-100 selection:bg-neonCyan selection:text-black">
+
+  <!-- Header Section -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-gray-800/80 px-4 py-3 md:px-8">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <!-- Logo & Title -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="app.showHome()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-neon-cyan">
+          <i class="fa-solid font-bold text-xl fa-gamepad"></i>
+        </div>
+        <div>
+          <h1 class="font-orbitron font-extrabold text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-glow-cyan">
+            GAME PLAY
+          </h1>
+          <p class="text-[10px] text-gray-400 font-semibold tracking-wider">BY SHADMAN WASIF FARUQUE</p>
+        </div>
+      </div>
+
+      <!-- Header Action Controls -->
+      <div class="flex items-center space-x-2.5">
+        <button id="audio-toggle-btn" onclick="sound.toggleAudio()" class="p-2.5 rounded-xl bg-darkCard border border-gray-700/60 text-gray-300 hover:text-cyan-400 hover:border-cyan-500/50 transition duration-200" title="Sound Mute/Unmute">
+          <i id="audio-icon" class="fa-solid fa-volume-high text-lg"></i>
+        </button>
+        <button onclick="app.showResetScoresModal()" class="p-2.5 rounded-xl bg-darkCard border border-gray-700/60 text-gray-300 hover:text-amber-400 hover:border-amber-500/50 transition duration-200" title="High Scores">
+          <i class="fa-solid fa-trophy text-lg text-amber-400"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow flex flex-col relative">
+
+    <!-- HOME PAGE VIEW -->
+    <section id="home-view" class="p-4 md:p-8 max-w-7xl mx-auto w-full flex-grow flex flex-col">
+      <!-- Hero Banner -->
+      <div class="relative overflow-hidden rounded-2xl glass-panel p-6 md:p-10 mb-8 border border-gray-800 flex flex-col items-center text-center">
+        <div class="absolute -top-24 -left-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-3 tracking-wide">
+          <i class="fa-solid fa-bolt mr-1"></i> INSTANT PLAY MINI-GAMES PLATFORM
+        </span>
+        <h2 class="font-orbitron text-3xl md:text-5xl font-extrabold tracking-tight mb-3 text-glow-cyan">
+          Play Amazing Mini Games
+        </h2>
+        <p class="text-gray-400 max-w-2xl text-sm md:text-base leading-relaxed mb-6">
+          Enjoy 10 exciting retro and arcade games built right into your browser. Features optimized dual-thumb mobile controls, joystick options, and instant gameplay rules!
+        </p>
+
+        <!-- Quick Stats Badge -->
+        <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-orbitron text-gray-300">
+          <div class="px-4 py-2 rounded-lg bg-darkCard/80 border border-gray-800 flex items-center gap-2">
+            <i class="fa-solid fa-gamepad text-cyan-400"></i> 10 Arcade Games
+          </div>
+          <div class="px-4 py-2 rounded-lg bg-darkCard/80 border border-gray-800 flex items-center gap-2">
+            <i class="fa-solid fa-mobile-screen-button text-purple-400"></i> Split Mobile Controls & Joystick
+          </div>
+          <div class="px-4 py-2 rounded-lg bg-darkCard/80 border border-gray-800 flex items-center gap-2">
+            <i class="fa-solid fa-book-open text-green-400"></i> How to Play Rules
+          </div>
+        </div>
+      </div>
+
+      <!-- Games Grid Header -->
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="font-orbitron text-xl md:text-2xl font-bold text-gray-100 flex items-center gap-2">
+          <i class="fa-solid fa-fire text-pink-500"></i> Arcade Selection
+        </h3>
+        <span class="text-xs text-gray-400 font-mono">Select any game to play</span>
+      </div>
+
+      <!-- Games Grid Container -->
+      <div id="games-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-8">
+        <!-- Game Cards rendered dynamically by JS -->
+      </div>
+    </section>
+
+    <!-- GAME PLAYER VIEW -->
+    <section id="game-view" class="hidden flex-grow flex flex-col max-w-5xl mx-auto w-full p-2 sm:p-4">
+      
+      <!-- Top Navigation & Score Bar -->
+      <div class="glass-panel rounded-xl p-3 mb-3 flex items-center justify-between gap-2 border border-gray-800">
+        <!-- Left: Navigation -->
+        <button onclick="app.showHome()" class="px-3.5 py-2 rounded-lg bg-darkCard border border-gray-700/80 hover:border-cyan-500 text-gray-300 hover:text-cyan-400 transition flex items-center gap-2 text-xs font-bold font-orbitron">
+          <i class="fa-solid fa-arrow-left"></i> <span class="hidden sm:inline">HOME</span>
+        </button>
+
+        <!-- Center: Game Title & Controls -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <h2 id="active-game-title" class="font-orbitron font-bold text-xs sm:text-base text-cyan-400 text-glow-cyan truncate max-w-[120px] sm:max-w-none">
+            GAME TITLE
+          </h2>
+          <div class="h-4 w-[1px] bg-gray-700"></div>
+          
+          <!-- Rules Button -->
+          <button onclick="app.showRulesModal()" class="px-2.5 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/40 text-purple-300 hover:bg-purple-500/20 text-xs font-bold flex items-center gap-1.5" title="How to Play Rules">
+            <i class="fa-solid fa-circle-info text-purple-400"></i> <span class="hidden md:inline">RULES</span>
+          </button>
+          
+          <button id="pause-btn" onclick="app.togglePause()" class="px-2.5 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/20 text-xs font-bold flex items-center gap-1.5">
+            <i id="pause-icon" class="fa-solid fa-pause"></i> <span id="pause-text" class="hidden md:inline">PAUSE</span>
+          </button>
+          <button onclick="app.restartActiveGame()" class="px-2.5 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/20 text-xs font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate-right"></i> <span class="hidden md:inline">RESTART</span>
+          </button>
+        </div>
+
+        <!-- Right: Score & Speedometer Bar -->
+        <div class="flex items-center gap-3 font-orbitron">
+          <!-- Optional Speed Gauge for Car Racing -->
+          <div id="speed-container" class="hidden text-right border-r border-gray-700/60 pr-3">
+            <div class="text-[8px] text-cyan-400 uppercase tracking-wider">SPEED</div>
+            <div id="speed-display" class="text-xs sm:text-sm font-black text-cyan-300">120 MPH</div>
+          </div>
+
+          <div class="text-right">
+            <div class="text-[8px] text-gray-400 uppercase tracking-wider">SCORE</div>
+            <div id="current-score" class="text-sm sm:text-lg font-black text-green-400 leading-none">0</div>
+          </div>
+          <div class="text-right border-l border-gray-700/60 pl-3">
+            <div class="text-[8px] text-gray-400 uppercase tracking-wider">BEST</div>
+            <div id="current-highscore" class="text-sm sm:text-lg font-black text-amber-400 leading-none">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Frame Container -->
+      <div class="relative flex-grow flex items-center justify-center bg-darkCard rounded-xl border border-gray-800 overflow-hidden shadow-2xl p-1 min-h-[300px] max-h-[580px]">
+        <!-- HTML5 Canvas -->
+        <canvas id="game-canvas" class="w-full h-full object-contain shadow-inner"></canvas>
+
+        <!-- Overlay: Game Start Screen -->
+        <div id="overlay-start" class="absolute inset-0 glass-panel bg-black/85 flex flex-col items-center justify-center p-6 text-center z-20">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center mb-4 text-3xl shadow-neon-cyan">
+            <i id="start-game-icon" class="fa-solid fa-gamepad text-white"></i>
+          </div>
+          <h3 id="start-game-name" class="font-orbitron text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
+            GAME TITLE
+          </h3>
+          <p id="start-game-desc" class="text-gray-300 text-xs sm:text-sm max-w-md mb-6 leading-relaxed">
+            Use keyboard arrows or split on-screen touch controls.
+          </p>
+          
+          <div class="flex items-center gap-3">
+            <button onclick="app.startActiveGame()" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-500 text-white font-orbitron font-extrabold text-sm sm:text-base tracking-wider hover:opacity-95 transform active:scale-95 shadow-neon-cyan transition duration-200 flex items-center gap-2">
+              <i class="fa-solid fa-play"></i> START GAME
+            </button>
+            <button onclick="app.showRulesModal()" class="px-4 py-3.5 rounded-xl bg-darkCard border border-purple-500/50 text-purple-300 font-orbitron font-bold text-xs tracking-wider hover:bg-purple-500/20 transition">
+              <i class="fa-solid fa-book-open mr-1"></i> RULES
+            </button>
+          </div>
+        </div>
+
+        <!-- Overlay: Game Over Screen -->
+        <div id="overlay-gameover" class="hidden absolute inset-0 glass-panel bg-black/90 flex flex-col items-center justify-center p-6 text-center z-20">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-500 to-red-600 flex items-center justify-center mb-4 text-3xl shadow-neon-purple animate-bounce">
+            <i class="fa-solid fa-skull text-white"></i>
+          </div>
+          <h3 class="font-orbitron text-3xl font-black text-pink-500 mb-1 tracking-wider">GAME OVER</h3>
+          <p class="text-gray-400 text-xs mb-4">Nice try! Play again to beat your high score.</p>
+          
+          <div class="bg-darkBg/90 border border-gray-800 rounded-xl p-4 w-64 mb-6 space-y-2">
+            <div class="flex justify-between items-center text-sm font-orbitron">
+              <span class="text-gray-400">FINAL SCORE:</span>
+              <span id="final-score" class="font-black text-cyan-400 text-lg">0</span>
+            </div>
+            <div class="flex justify-between items-center text-sm font-orbitron border-t border-gray-800 pt-2">
+              <span class="text-gray-400">HIGH SCORE:</span>
+              <span id="final-highscore" class="font-black text-amber-400 text-lg">0</span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <button onclick="app.restartActiveGame()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-orbitron font-bold text-xs tracking-wider hover:opacity-90 active:scale-95 transition flex items-center gap-2 shadow-neon-cyan">
+              <i class="fa-solid fa-rotate-right"></i> RESTART
+            </button>
+            <button onclick="app.showHome()" class="px-6 py-3 rounded-xl bg-darkCard border border-gray-700 text-gray-300 font-orbitron font-bold text-xs tracking-wider hover:text-white hover:border-gray-500 active:scale-95 transition flex items-center gap-2">
+              <i class="fa-solid fa-house"></i> MAIN MENU
+            </button>
+          </div>
+        </div>
+
+        <!-- Overlay: Pause Screen -->
+        <div id="overlay-paused" class="hidden absolute inset-0 glass-panel bg-black/80 flex flex-col items-center justify-center p-6 text-center z-20">
+          <i class="fa-solid fa-pause text-5xl text-yellow-400 mb-3 animate-pulse"></i>
+          <h3 class="font-orbitron text-2xl font-black text-yellow-400 mb-4 tracking-wider">GAME PAUSED</h3>
+          <button onclick="app.togglePause()" class="px-8 py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-orbitron font-bold text-sm tracking-wider hover:opacity-90 active:scale-95 transition shadow-lg">
+            RESUME GAME
+          </button>
+        </div>
+      </div>
+
+      <!-- MOBILE CONTROLS PANEL (Redesigned Split Ergonomic Thumb Layout) -->
+      <div id="mobile-controls-panel" class="mt-3 p-3 glass-panel rounded-xl border border-gray-800 flex items-center justify-between select-none min-h-[140px]">
+        
+        <!-- FAR LEFT: Left Thumb Control Cluster (LEFT Arrow + Vertical Steering / Touch Joystick) -->
+        <div class="flex items-center gap-2">
+          <!-- Standard D-Pad Left Cluster -->
+          <div id="standard-dpad-left" class="flex items-center gap-2">
+            <!-- FAR LEFT Arrow Button -->
+            <button id="btn-d-left" class="btn-touch w-14 h-14 bg-cyan-500/20 active:bg-cyan-500 border border-cyan-400/60 rounded-2xl flex items-center justify-center text-cyan-300 active:text-black shadow-neon-cyan text-xl">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+
+            <!-- Vertical Up/Down Buttons Stacked -->
+            <div class="flex flex-col gap-2">
+              <button id="btn-d-up" class="btn-touch w-12 h-12 bg-darkCard/90 active:bg-cyan-500 border border-gray-700/80 rounded-xl flex items-center justify-center text-cyan-400 active:text-black shadow-md">
+                <i class="fa-solid fa-arrow-up text-base"></i>
+              </button>
+              <button id="btn-d-down" class="btn-touch w-12 h-12 bg-darkCard/90 active:bg-cyan-500 border border-gray-700/80 rounded-xl flex items-center justify-center text-cyan-400 active:text-black shadow-md">
+                <i class="fa-solid fa-arrow-down text-base"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Touch Joystick Overlay (Shown for Shooting, Snake, Maze, Jump Games) -->
+          <div id="joystick-container" class="hidden relative w-32 h-32 joystick-base flex items-center justify-center">
+            <div id="joystick-knob" class="w-12 h-12 joystick-thumb"></div>
+            <span class="absolute bottom-1 text-[8px] font-orbitron text-cyan-400/80 uppercase">JOYSTICK</span>
+          </div>
+        </div>
+
+        <!-- CENTER: Control Mode Info -->
+        <div class="hidden lg:flex flex-col items-center justify-center text-center text-xs text-gray-400 space-y-1">
+          <div class="font-orbitron font-semibold text-gray-300">SPLIT TOUCH CONTROLS</div>
+          <div class="text-[11px] text-cyan-400 font-mono">Left Thumb: Direction / Right Thumb: Steering & Fire</div>
+        </div>
+
+        <!-- FAR RIGHT: Right Thumb Control Cluster (RIGHT Arrow + Action Buttons) -->
+        <div class="flex items-center gap-2">
+          <!-- Action Buttons Stack -->
+          <div id="action-buttons-cluster" class="flex items-center gap-2">
+            <!-- Action B (Slide / Brake / Hint) -->
+            <div id="container-action-b" class="flex flex-col items-center">
+              <button id="btn-action-b" class="btn-touch w-12 h-12 bg-purple-600/30 active:bg-purple-500 border border-purple-500/50 rounded-full flex items-center justify-center text-purple-300 active:text-white shadow-neon-purple font-orbitron font-bold text-xs">
+                B
+              </button>
+              <span id="label-action-b" class="text-[9px] font-orbitron text-gray-400 mt-0.5">SLIDE</span>
+            </div>
+
+            <!-- Action A (Jump / Shoot / Fire / Accel) -->
+            <div class="flex flex-col items-center">
+              <button id="btn-action-a" class="btn-touch w-14 h-14 bg-cyan-500/30 active:bg-cyan-400 border border-cyan-400/50 rounded-full flex items-center justify-center text-cyan-300 active:text-black shadow-neon-cyan font-orbitron font-extrabold text-sm">
+                A
+              </button>
+              <span id="label-action-a" class="text-[9px] font-orbitron text-cyan-400 mt-0.5">FIRE</span>
+            </div>
+          </div>
+
+          <!-- FAR RIGHT Arrow Button -->
+          <button id="btn-d-right" class="btn-touch w-14 h-14 bg-cyan-500/20 active:bg-cyan-500 border border-cyan-400/60 rounded-2xl flex items-center justify-center text-cyan-300 active:text-black shadow-neon-cyan text-xl ml-1">
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- GAME RULES & HOW TO PLAY MODAL -->
+  <div id="rules-modal" class="hidden fixed inset-0 z-50 glass-panel bg-black/85 flex items-center justify-center p-4">
+    <div class="bg-darkCard border border-purple-500/40 rounded-2xl p-6 max-w-lg w-full shadow-2xl relative">
+      <div class="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+        <h3 id="rules-game-title" class="font-orbitron font-bold text-lg text-purple-400 flex items-center gap-2">
+          <i class="fa-solid fa-book-open"></i> HOW TO PLAY
+        </h3>
+        <button onclick="app.closeRulesModal()" class="text-gray-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm text-gray-300 max-h-[60vh] overflow-y-auto pr-2">
+        <div>
+          <h4 class="font-orbitron font-semibold text-cyan-400 mb-1">OBJECTIVE</h4>
+          <p id="rules-objective" class="leading-relaxed text-gray-300">Game rules objective text...</p>
+        </div>
+
+        <div>
+          <h4 class="font-orbitron font-semibold text-amber-400 mb-1">KEYBOARD CONTROLS (PC)</h4>
+          <p id="rules-pc-controls" class="leading-relaxed text-gray-300 font-mono">Arrow Keys / WASD / Spacebar</p>
+        </div>
+
+        <div>
+          <h4 class="font-orbitron font-semibold text-pink-400 mb-1">MOBILE CONTROLS</h4>
+          <p id="rules-mobile-controls" class="leading-relaxed text-gray-300">Far Left/Right Arrow buttons & Action buttons</p>
+        </div>
+
+        <div class="bg-darkBg/90 p-3 rounded-xl border border-gray-800">
+          <h4 class="font-orbitron font-semibold text-green-400 mb-1">PRO TIPS & SCORING</h4>
+          <p id="rules-scoring" class="leading-relaxed text-gray-400">Pro tip details...</p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button onclick="app.closeRulesModal()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-orbitron font-bold text-xs">
+          GOT IT!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- High Scores Modal -->
+  <div id="scores-modal" class="hidden fixed inset-0 z-50 glass-panel bg-black/80 flex items-center justify-center p-4">
+    <div class="bg-darkCard border border-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl relative">
+      <div class="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+        <h3 class="font-orbitron font-bold text-lg text-amber-400 flex items-center gap-2">
+          <i class="fa-solid fa-trophy"></i> HIGH SCORES
+        </h3>
+        <button onclick="app.closeResetScoresModal()" class="text-gray-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      
+      <div id="highscores-list" class="space-y-2 max-h-60 overflow-y-auto pr-1 mb-6 text-sm">
+        <!-- Dynamic list of scores -->
+      </div>
+
+      <div class="flex justify-between items-center gap-3">
+        <button onclick="app.clearHighScores()" class="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-xs font-orbitron font-bold">
+          <i class="fa-solid fa-trash mr-1"></i> RESET SCORES
+        </button>
+        <button onclick="app.closeResetScoresModal()" class="px-5 py-2 rounded-xl bg-gray-800 text-gray-300 hover:text-white text-xs font-orbitron font-bold">
+          CLOSE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="glass-panel border-t border-gray-800/80 py-5 px-4 text-center text-xs text-gray-400">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="font-orbitron font-bold text-cyan-400">GAME PLAY</span>
+        <span>•</span>
+        <span>Owner: <strong class="text-gray-200">Shadman Wasif Faruque</strong></span>
+      </div>
+      <div>
+        © 2026 All rights reserved. Built with HTML5 Canvas & Web Audio API.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* =========================================================================
+       1. WEB AUDIO SYNTHESIZER ENGINE
+       ========================================================================= */
+    class AudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggleAudio() {
+        this.muted = !this.muted;
+        const btnIcon = document.getElementById('audio-icon');
+        if (this.muted) {
+          btnIcon.className = 'fa-solid fa-volume-xmark text-lg text-red-400';
+        } else {
+          btnIcon.className = 'fa-solid fa-volume-high text-lg text-cyan-400';
+          this.playClick();
+        }
+      }
+
+      playTone(freq, duration, type = 'sine', startGain = 0.15, endGain = 0.001) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+          gain.gain.setValueAtTime(startGain, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(endGain, this.ctx.currentTime + duration);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {
+          console.warn('Audio play error', e);
+        }
+      }
+
+      playClick() {
+        this.playTone(650, 0.05, 'sine', 0.12);
+      }
+
+      playJump() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(650, this.ctx.currentTime + 0.16);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.16);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.16);
+        } catch(e){}
+      }
+
+      playShoot() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(900, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.12);
+        } catch(e){}
+      }
+
+      playScore() {
+        this.playTone(523.25, 0.08, 'sine', 0.2); // C5
+        setTimeout(() => this.playTone(659.25, 0.12, 'sine', 0.2), 80); // E5
+      }
+
+      playEngineRev() {
+        this.playTone(110, 0.1, 'sawtooth', 0.05);
+      }
+
+      playGameOver() {
+        if (this.muted) return;
+        this.playTone(280, 0.2, 'sawtooth', 0.2);
+        setTimeout(() => this.playTone(220, 0.2, 'sawtooth', 0.2), 150);
+        setTimeout(() => this.playTone(160, 0.4, 'sawtooth', 0.2), 300);
+      }
+
+      playWin() {
+        const notes = [400, 520, 650, 850];
+        notes.forEach((freq, idx) => {
+          setTimeout(() => this.playTone(freq, 0.1, 'sine', 0.2), idx * 80);
+        });
+      }
+    }
+
+    const sound = new AudioEngine();
+
+    /* =========================================================================
+       2. GAMES METADATA & RULES DEFINITION (10 Games)
+       ========================================================================= */
+    const GAMES_LIST = [
+      {
+        id: 'car-racing',
+        title: 'Car Racing',
+        icon: 'fa-car-side',
+        color: 'from-cyan-500 to-blue-600',
+        desc: 'Dodge oncoming traffic as speed continuously increases over time!',
+        actionALabel: 'ACCEL',
+        actionBLabel: 'BRAKE',
+        objective: 'Drive your racing car as long as possible. The game speed automatically ramps up faster and faster over time!',
+        pcControls: 'Left/Right Arrows or A/D to steer, Up/Down to accelerate or brake.',
+        mobileControls: 'Use Far Left / Far Right touch arrows to steer on mobile.',
+        scoring: 'Score points continuously for every second survived at higher speeds.'
+      },
+      {
+        id: 'snake',
+        title: 'Snake Game',
+        icon: 'fa-staff-snake',
+        color: 'from-green-500 to-emerald-700',
+        desc: 'Eat glowing energy orbs and grow without crashing into walls.',
+        actionALabel: 'BOOST',
+        actionBLabel: 'NONE',
+        objective: 'Guide the glowing neon snake to consume orbs and grow longer without biting yourself or hitting borders.',
+        pcControls: 'Arrow keys or WASD to turn snake.',
+        mobileControls: 'Use Touch Joystick on left or screen arrows to turn.',
+        scoring: 'Each orb awards 10 points.'
+      },
+      {
+        id: 'ping-pong',
+        title: 'Ping Pong',
+        icon: 'fa-table-tennis-paddle-ball',
+        color: 'from-amber-500 to-orange-600',
+        desc: 'Classic arcade table tennis duel against an AI opponent.',
+        actionALabel: 'SERVE',
+        actionBLabel: 'NONE',
+        objective: 'Deflect the ball using your neon paddle and pass it beyond the AI opponent.',
+        pcControls: 'Left / Right Arrow keys to slide paddle.',
+        mobileControls: 'Use Far Left and Far Right touch arrow buttons.',
+        scoring: 'Deflecting ball awards 10 points, beating AI awards bonus 50 points.'
+      },
+      {
+        id: 'maze',
+        title: 'Maze Game',
+        icon: 'fa-cubes-stacked',
+        color: 'from-purple-500 to-indigo-700',
+        desc: 'Navigate through complex procedural mazes to reach the exit portal.',
+        actionALabel: 'HINT',
+        actionBLabel: 'NONE',
+        objective: 'Find the path through the labyrinth from top-left to the green exit portal.',
+        pcControls: 'Arrow keys / WASD to move step by step.',
+        mobileControls: 'Use Touch Joystick on left or on-screen directional controls.',
+        scoring: '+100 points for each maze level cleared.'
+      },
+      {
+        id: 'shooting',
+        title: 'Shooting Game',
+        icon: 'fa-crosshair',
+        color: 'from-pink-500 to-rose-700',
+        desc: 'Defend space from waves of alien invaders using laser cannons.',
+        actionALabel: 'FIRE',
+        actionBLabel: 'NONE',
+        objective: 'Destroy incoming alien invaders. Up to 100 missed shots are allowed before game over!',
+        pcControls: 'Left / Right keys to move, Spacebar to shoot.',
+        mobileControls: 'Use touch Joystick on left to slide, and FIRE button on right to shoot.',
+        scoring: 'Each alien ship destroyed awards 20 points.'
+      },
+      {
+        id: 'jump',
+        title: 'Jump Game',
+        icon: 'fa-angles-up',
+        color: 'from-teal-400 to-cyan-600',
+        desc: 'Bounce endlessly upwards on moving neon spring platforms.',
+        actionALabel: 'JUMP',
+        actionBLabel: 'NONE',
+        objective: 'Keep leaping upwards on platforms without falling off the bottom edge.',
+        pcControls: 'Left / Right arrows or A/D keys.',
+        mobileControls: 'Use Touch Joystick or screen arrows to guide jumper.',
+        scoring: 'Score increases automatically as higher altitude is reached.'
+      },
+      {
+        id: 'puzzle',
+        title: '2048 Puzzle',
+        icon: 'fa-border-all',
+        color: 'from-yellow-400 to-amber-600',
+        desc: 'Slide and merge matching neon number tiles to reach tile 2048!',
+        actionALabel: 'SLIDE',
+        actionBLabel: 'NONE',
+        objective: 'Combine tiles with identical numbers to double their value and create tile 2048.',
+        pcControls: 'Arrow keys or WASD to slide all tiles.',
+        mobileControls: 'Use Up/Down/Left/Right touch arrows.',
+        scoring: 'Score increases by the value of merged tiles.'
+      },
+      {
+        id: 'stick-hero',
+        title: 'Stick Hero',
+        icon: 'fa-ruler-combined',
+        color: 'from-indigo-500 to-violet-700',
+        desc: 'Extend the bridge stick to exact lengths to cross platform gaps.',
+        actionALabel: 'GROW',
+        actionBLabel: 'NONE',
+        objective: 'Hold action button to grow the stick bridge to cross gaps between pillars.',
+        pcControls: 'Press and hold Spacebar or Up Arrow.',
+        mobileControls: 'Hold GROW / ACTION button on right thumb area.',
+        scoring: '+10 points per successful platform bridge crossed.'
+      },
+      {
+        id: 'brick-breaker',
+        title: 'Brick Breaker',
+        icon: 'fa-cubes',
+        color: 'from-red-500 to-pink-600',
+        desc: 'Smash all neon bricks using your paddle and bouncing energy ball.',
+        actionALabel: 'LAUNCH',
+        actionBLabel: 'NONE',
+        objective: 'Clear all colorful neon brick rows with the ball without dropping it.',
+        pcControls: 'Left / Right Arrow keys.',
+        mobileControls: 'Far Left / Far Right touch arrow buttons.',
+        scoring: '+15 points for every brick smashed.'
+      },
+      {
+        id: 'endless-runner',
+        title: 'Endless Runner',
+        icon: 'fa-person-running',
+        color: 'from-fuchsia-500 to-purple-800',
+        desc: 'Run, jump over floor spikes, and slide under overhead obstacles!',
+        actionALabel: 'JUMP',
+        actionBLabel: 'SLIDE',
+        objective: 'Guide the human runner past spikes and high barriers as long as possible.',
+        pcControls: 'Up Arrow / Space to Jump, Down Arrow / Shift to Slide.',
+        mobileControls: 'Tap ACTION A (Jump) on right thumb area.',
+        scoring: 'Score increases steadily for distance survived.'
+      }
+    ];
+
+    /* =========================================================================
+       3. INPUT ENGINE (Keyboard, Ergonomic Touch Split Controls & Touch Joystick)
+       ========================================================================= */
+    const Input = {
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+      actionA: false,
+      actionB: false,
+
+      // Joystick state for games
+      joystickActive: false,
+      joystickVector: { x: 0, y: 0 },
+
+      reset() {
+        this.up = false;
+        this.down = false;
+        this.left = false;
+        this.right = false;
+        this.actionA = false;
+        this.actionB = false;
+        this.joystickActive = false;
+        this.joystickVector = { x: 0, y: 0 };
+      },
+
+      init() {
+        // Keyboard event listeners
+        window.addEventListener('keydown', (e) => {
+          if (['ArrowUp', 'KeyW'].includes(e.code)) this.up = true;
+          if (['ArrowDown', 'KeyS'].includes(e.code)) this.down = true;
+          if (['ArrowLeft', 'KeyA'].includes(e.code)) this.left = true;
+          if (['ArrowRight', 'KeyD'].includes(e.code)) this.right = true;
+          if (['Space', 'KeyJ', 'Enter'].includes(e.code)) this.actionA = true;
+          if (['KeyK', 'ShiftLeft'].includes(e.code)) this.actionB = true;
+        });
+
+        window.addEventListener('keyup', (e) => {
+          if (['ArrowUp', 'KeyW'].includes(e.code)) this.up = false;
+          if (['ArrowDown', 'KeyS'].includes(e.code)) this.down = false;
+          if (['ArrowLeft', 'KeyA'].includes(e.code)) this.left = false;
+          if (['ArrowRight', 'KeyD'].includes(e.code)) this.right = false;
+          if (['Space', 'KeyJ', 'Enter'].includes(e.code)) this.actionA = false;
+          if (['KeyK', 'ShiftLeft'].includes(e.code)) this.actionB = false;
+        });
+
+        // Touch button binding helper
+        const bindBtn = (id, prop) => {
+          const btn = document.getElementById(id);
+          if (!btn) return;
+
+          const press = (e) => {
+            e.preventDefault();
+            this[prop] = true;
+            sound.init();
+          };
+          const release = (e) => {
+            e.preventDefault();
+            this[prop] = false;
+          };
+
+          btn.addEventListener('touchstart', press, { passive: false });
+          btn.addEventListener('touchend', release, { passive: false });
+          btn.addEventListener('mousedown', press);
+          btn.addEventListener('mouseup', release);
+          btn.addEventListener('mouseleave', release);
+        };
+
+        bindBtn('btn-d-up', 'up');
+        bindBtn('btn-d-down', 'down');
+        bindBtn('btn-d-left', 'left');
+        bindBtn('btn-d-right', 'right');
+        bindBtn('btn-action-a', 'actionA');
+        bindBtn('btn-action-b', 'actionB');
+
+        // Touch Joystick Binding
+        const joyContainer = document.getElementById('joystick-container');
+        const joyKnob = document.getElementById('joystick-knob');
+
+        if (joyContainer && joyKnob) {
+          const handleTouch = (e) => {
+            e.preventDefault();
+            sound.init();
+            const touch = e.touches ? e.touches[0] : e;
+            const rect = joyContainer.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            let dx = touch.clientX - centerX;
+            let dy = touch.clientY - centerY;
+            const distance = Math.hypot(dx, dy);
+            const maxRadius = rect.width / 2 - 15;
+
+            if (distance > maxRadius) {
+              dx = (dx / distance) * maxRadius;
+              dy = (dy / distance) * maxRadius;
+            }
+
+            joyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+            this.joystickActive = true;
+            this.joystickVector = {
+              x: dx / maxRadius,
+              y: dy / maxRadius
+            };
+
+            // Map joystick vector to directional states
+            if (this.joystickVector.x < -0.2) this.left = true; else this.left = false;
+            if (this.joystickVector.x > 0.2) this.right = true; else this.right = false;
+            if (this.joystickVector.y < -0.2) this.up = true; else this.up = false;
+            if (this.joystickVector.y > 0.2) this.down = true; else this.down = false;
+          };
+
+          const resetJoy = (e) => {
+            if (e) e.preventDefault();
+            joyKnob.style.transform = `translate(0px, 0px)`;
+            this.joystickActive = false;
+            this.joystickVector = { x: 0, y: 0 };
+            this.left = false;
+            this.right = false;
+            this.up = false;
+            this.down = false;
+          };
+
+          joyContainer.addEventListener('touchstart', handleTouch, { passive: false });
+          joyContainer.addEventListener('touchmove', handleTouch, { passive: false });
+          joyContainer.addEventListener('touchend', resetJoy, { passive: false });
+          joyContainer.addEventListener('mousedown', handleTouch);
+          window.addEventListener('mouseup', resetJoy);
+        }
+      }
+    };
+
+    /* =========================================================================
+       4. APP & VIEW CONTROLLER
+       ========================================================================= */
+    class AppController {
+      constructor() {
+        this.activeGameId = null;
+        this.activeGameInstance = null;
+        this.score = 0;
+        this.highScores = JSON.parse(localStorage.getItem('gp_highscores') || '{}');
+        this.isPaused = false;
+        this.animFrameReq = null;
+      }
+
+      init() {
+        Input.init();
+        this.renderHomeGrid();
+        this.showHome();
+      }
+
+      getHighScore(gameId) {
+        return this.highScores[gameId] || 0;
+      }
+
+      setHighScore(gameId, score) {
+        if (score > this.getHighScore(gameId)) {
+          this.highScores[gameId] = score;
+          localStorage.setItem('gp_highscores', JSON.stringify(this.highScores));
+          return true;
+        }
+        return false;
+      }
+
+      renderHomeGrid() {
+        const grid = document.getElementById('games-grid');
+        grid.innerHTML = GAMES_LIST.map(g => {
+          const hs = this.getHighScore(g.id);
+          return `
+            <div class="glass-card rounded-2xl p-5 flex flex-col justify-between relative group">
+              <div>
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr ${g.color} flex items-center justify-center text-white text-2xl shadow-lg mb-4 transform group-hover:scale-110 transition duration-300">
+                  <i class="fa-solid ${g.icon}"></i>
+                </div>
+                <h4 class="font-orbitron font-extrabold text-lg text-white mb-1 group-hover:text-cyan-400 transition">${g.title}</h4>
+                <p class="text-xs text-gray-400 leading-relaxed mb-4">${g.desc}</p>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between text-xs font-orbitron text-gray-400 border-t border-gray-800/80 pt-3 mb-4">
+                  <span>HIGH SCORE</span>
+                  <span class="text-amber-400 font-bold">${hs}</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button onclick="app.loadGame('${g.id}')" class="flex-grow py-2.5 rounded-xl bg-gradient-to-r ${g.color} text-white font-orbitron font-bold text-xs tracking-wider shadow-md hover:opacity-90 active:scale-95 transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-play text-xs"></i> PLAY NOW
+                  </button>
+                  <button onclick="app.showRulesModalFor('${g.id}')" class="p-2.5 rounded-xl bg-darkCard border border-gray-700 hover:border-purple-500 text-purple-300 transition" title="How to Play Rules">
+                    <i class="fa-solid fa-book-open text-xs"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      showHome() {
+        if (this.animFrameReq) {
+          cancelAnimationFrame(this.animFrameReq);
+        }
+        document.getElementById('home-view').classList.remove('hidden');
+        document.getElementById('game-view').classList.add('hidden');
+        this.renderHomeGrid();
+      }
+
+      loadGame(gameId) {
+        sound.playClick();
+        this.activeGameId = gameId;
+        const config = GAMES_LIST.find(g => g.id === gameId);
+
+        document.getElementById('home-view').classList.add('hidden');
+        document.getElementById('game-view').classList.remove('hidden');
+        document.getElementById('active-game-title').innerText = config.title;
+        document.getElementById('start-game-name').innerText = config.title;
+        document.getElementById('start-game-desc').innerText = config.desc;
+        document.getElementById('start-game-icon').className = `fa-solid ${config.icon} text-white`;
+
+        document.getElementById('label-action-a').innerText = config.actionALabel;
+        document.getElementById('label-action-b').innerText = config.actionBLabel;
+
+        // Configure mobile control layouts based on the active game
+        const joyContainer = document.getElementById('joystick-container');
+        const stdDpadLeft = document.getElementById('standard-dpad-left');
+        const containerActionB = document.getElementById('container-action-b');
+
+        // Enable joystick for shooting, snake, maze, and jump games
+        if (['shooting', 'snake', 'maze', 'jump'].includes(gameId)) {
+          joyContainer.classList.remove('hidden');
+          stdDpadLeft.classList.add('hidden');
+        } else {
+          joyContainer.classList.add('hidden');
+          stdDpadLeft.classList.remove('hidden');
+        }
+
+        // Show/hide Action B button for games needing only 1 button (Stick Hero, Endless Runner)
+        if (['stick-hero', 'endless-runner'].includes(gameId)) {
+          containerActionB.classList.add('hidden');
+        } else {
+          containerActionB.classList.remove('hidden');
+        }
+
+        // Toggle Speedometer for Car Racing
+        const speedContainer = document.getElementById('speed-container');
+        if (gameId === 'car-racing') speedContainer.classList.remove('hidden');
+        else speedContainer.classList.add('hidden');
+
+        document.getElementById('current-highscore').innerText = this.getHighScore(gameId);
+        document.getElementById('current-score').innerText = '0';
+
+        document.getElementById('overlay-start').classList.remove('hidden');
+        document.getElementById('overlay-gameover').classList.add('hidden');
+        document.getElementById('overlay-paused').classList.add('hidden');
+
+        this.initCanvas();
+      }
+
+      initCanvas() {
+        const canvas = document.getElementById('game-canvas');
+        const container = canvas.parentElement;
+        canvas.width = Math.min(container.clientWidth - 8, 800);
+        canvas.height = Math.min(container.clientHeight - 8, 500);
+      }
+
+      startActiveGame() {
+        sound.playClick();
+        document.getElementById('overlay-start').classList.add('hidden');
+        document.getElementById('overlay-gameover').classList.add('hidden');
+        document.getElementById('overlay-paused').classList.add('hidden');
+        
+        this.score = 0;
+        this.isPaused = false;
+        Input.reset();
+
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Instantiate requested game engine
+        switch(this.activeGameId) {
+          case 'car-racing': this.activeGameInstance = new CarRacingGame(canvas, ctx); break;
+          case 'snake': this.activeGameInstance = new SnakeGame(canvas, ctx); break;
+          case 'ping-pong': this.activeGameInstance = new PingPongGame(canvas, ctx); break;
+          case 'maze': this.activeGameInstance = new MazeGame(canvas, ctx); break;
+          case 'shooting': this.activeGameInstance = new ShootingGame(canvas, ctx); break;
+          case 'jump': this.activeGameInstance = new JumpGame(canvas, ctx); break;
+          case 'puzzle': this.activeGameInstance = new Puzzle2048Game(canvas, ctx); break;
+          case 'stick-hero': this.activeGameInstance = new StickHeroGame(canvas, ctx); break;
+          case 'brick-breaker': this.activeGameInstance = new BrickBreakerGame(canvas, ctx); break;
+          case 'endless-runner': this.activeGameInstance = new EndlessRunnerGame(canvas, ctx); break;
+        }
+
+        if (this.animFrameReq) cancelAnimationFrame(this.animFrameReq);
+        
+        let lastTime = performance.now();
+        const loop = (now) => {
+          const dt = Math.min((now - lastTime) / 1000, 0.1);
+          lastTime = now;
+
+          if (!this.isPaused && this.activeGameInstance) {
+            this.activeGameInstance.update(dt);
+            this.activeGameInstance.render();
+          }
+
+          if (this.activeGameInstance && !this.activeGameInstance.gameOver) {
+            this.animFrameReq = requestAnimationFrame(loop);
+          }
+        };
+
+        this.animFrameReq = requestAnimationFrame(loop);
+      }
+
+      restartActiveGame() {
+        this.startActiveGame();
+      }
+
+      togglePause() {
+        if (!this.activeGameInstance || this.activeGameInstance.gameOver) return;
+        this.isPaused = !this.isPaused;
+        const pBtn = document.getElementById('pause-icon');
+        const pText = document.getElementById('pause-text');
+        
+        if (this.isPaused) {
+          document.getElementById('overlay-paused').classList.remove('hidden');
+          pBtn.className = 'fa-solid fa-play';
+          if (pText) pText.innerText = 'RESUME';
+        } else {
+          document.getElementById('overlay-paused').classList.add('hidden');
+          pBtn.className = 'fa-solid fa-pause';
+          if (pText) pText.innerText = 'PAUSE';
+        }
+      }
+
+      updateScore(val) {
+        this.score = val;
+        document.getElementById('current-score').innerText = val;
+      }
+
+      triggerGameOver(score) {
+        sound.playGameOver();
+        const newRecord = this.setHighScore(this.activeGameId, score);
+        if (newRecord) sound.playWin();
+
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('final-highscore').innerText = this.getHighScore(this.activeGameId);
+        document.getElementById('overlay-gameover').classList.remove('hidden');
+      }
+
+      // Rules Modal Handler
+      showRulesModal() {
+        if (this.activeGameId) this.showRulesModalFor(this.activeGameId);
+      }
+
+      showRulesModalFor(gameId) {
+        sound.playClick();
+        const config = GAMES_LIST.find(g => g.id === gameId);
+        if (!config) return;
+
+        document.getElementById('rules-game-title').innerHTML = `<i class="fa-solid ${config.icon}"></i> ${config.title} - RULES`;
+        document.getElementById('rules-objective').innerText = config.objective;
+        document.getElementById('rules-pc-controls').innerText = config.pcControls;
+        document.getElementById('rules-mobile-controls').innerText = config.mobileControls;
+        document.getElementById('rules-scoring').innerText = config.scoring;
+
+        document.getElementById('rules-modal').classList.remove('hidden');
+      }
+
+      closeRulesModal() {
+        document.getElementById('rules-modal').classList.add('hidden');
+      }
+
+      showResetScoresModal() {
+        sound.playClick();
+        const list = document.getElementById('highscores-list');
+        list.innerHTML = GAMES_LIST.map(g => `
+          <div class="flex items-center justify-between p-2.5 rounded-lg bg-darkBg border border-gray-800">
+            <span class="font-semibold text-gray-300 text-xs">${g.title}</span>
+            <span class="font-orbitron font-bold text-amber-400 text-xs">${this.getHighScore(g.id)}</span>
+          </div>
+        `).join('');
+        document.getElementById('scores-modal').classList.remove('hidden');
+      }
+
+      closeResetScoresModal() {
+        document.getElementById('scores-modal').classList.add('hidden');
+      }
+
+      clearHighScores() {
+        this.highScores = {};
+        localStorage.removeItem('gp_highscores');
+        this.showResetScoresModal();
+      }
+    }
+
+    /* =========================================================================
+       5. GAME ENGINES IMPLEMENTATION
+       ========================================================================= */
+
+    /* -------------------------------------------------------------------------
+       GAME 1: CAR RACING GAME
+       ------------------------------------------------------------------------- */
+    class CarRacingGame {
+      constructor(canvas, ctx) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.gameOver = false;
+        this.score = 0;
+        this.elapsedTime = 0;
+        
+        this.baseSpeed = 220; 
+        this.currentSpeed = 220;
+        
+        this.playerX = canvas.width / 2 - 20;
+        this.playerY = canvas.height - 85;
+        this.width = 40;
+        this.height = 70;
+        this.roadOffset = 0;
+        this.enemies = [];
+        this.spawnTimer = 0;
+      }
+
+      update(dt) {
+        if (this.gameOver) return;
+
+        this.elapsedTime += dt;
+        this.currentSpeed = this.baseSpeed + (this.elapsedTime * 14);
+        
+        const speedMPH = Math.floor(this.currentSpeed / 2);
+        const speedDisplay = document.getElementById('speed-display');
+        if (speedDisplay) speedDisplay.innerText = `${speedMPH} MPH`;
+
+        if (Math.random() < 0.05) sound.playEngineRev();
+
+        const turnSpeed = 320;
+        if (Input.left) this.playerX -= turnSpeed * dt;
+        if (Input.right) this.playerX += turnSpeed * dt;
+        if (Input.up) this.playerY -= turnSpeed * 0.4 * dt;
+        if (Input.down) this.playerY += turnSpeed * 0.4 * dt;
+
+        const roadLeft = this.canvas.width * 0.22;
+        const roadRight = this.canvas.width * 0.78 - this.width;
+        this.playerX = Math.max(roadLeft, Math.min(roadRight, this.playerX));
+        this.playerY = Math.max(50, Math.min(this.canvas.height - 80, this.playerY));
+
+        this.roadOffset = (this.roadOffset + this.currentSpeed * 1.5 * dt) % 40;
+
+        this.spawnTimer += dt;
+        const spawnInterval = Math.max(0.5, 1.3 - (this.elapsedTime * 0.02));
+        if (this.spawnTimer > spawnInterval) {
+          this.spawnTimer = 0;
+          const laneW = (roadRight - roadLeft) / 3;
+          const lane = Math.floor(Math.random() * 3);
+          const colors = ['#ff007f', '#39ff14', '#f59e0b', '#a855f7'];
+          this.enemies.push({
+            x: roadLeft + lane * laneW + laneW / 2 - 20,
+            y: -80,
+            speed: this.currentSpeed * (0.5 + Math.random() * 0.3),
+            color: colors[Math.floor(Math.random() * colors.length)]
+          });
+        }
+
+        for (let i = this.enemies.length - 1; i >= 0; i--) {
+          const e = this.enemies[i];
+          e.y += e.speed * dt;
+
+          if (
+            this.playerX < e.x + 36 &&
+            this.playerX + this.width > e.x + 4 &&
+            this.playerY < e.y + 65 &&
+            this.playerY + this.height > e.y + 5
+          ) {
+            this.gameOver = true;
+            app.triggerGameOver(Math.floor(this.score));
+            return;
+          }
+
+          if (e.y > this.canvas.height + 80) {
+            this.enemies.splice(i, 1);
+            this.score += 20;
+            sound.playScore();
+            app.updateScore(Math.floor(this.score));
+          }
+        }
+
+        this.score += dt * (this.currentSpeed / 20);
+        app.updateScore(Math.floor(this.score));
+      }
+
+      drawCarAvatar(x, y, color, isPlayer = false) {
+        const { ctx } = this;
+        ctx.save();
+        ctx.translate(x, y);
+
+        ctx.fillStyle = '#111';
+        ctx.fillRect(-2, 10, 6, 16);
+        ctx.fillRect(36, 10, 6, 16);
+        ctx.fillRect(-2, 45, 6, 16);
+        ctx.fillRect(36, 45, 6, 16);
+
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = isPlayer ? 12 : 6;
+
+        ctx.beginPath();
+        ctx.moveTo(8, 0);
+        ctx.lineTo(32, 0);
+        ctx.quadraticCurveTo(40, 10, 40, 25);
+        ctx.lineTo(40, 55);
+        ctx.quadraticCurveTo(40, 70, 32, 70);
+        ctx.lineTo(8, 70);
+        ctx.quadraticCurveTo(0, 70, 0, 55);
+        ctx.lineTo(0, 25);
+        ctx.quadraticCurveTo(0, 10, 8, 0);
+        ctx.fill();
+
+        ctx.fillStyle = '#111827';
+        ctx.beginPath();
+        ctx.moveTo(8, 20);
+        ctx.lineTo(32, 20);
+        ctx.lineTo(28, 36);
+        ctx.lineTo(12, 36);
+        ctx.closePath();
+        ctx.fill();
+
+        if (isPlayer) {
+          ctx.fillStyle = '#fde047';
+          ctx.fillRect(4, 2, 6, 4);
+          ctx.fillRect(30, 2, 6, 4);
+        } else {
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(4, 64, 6, 4);
+          ctx.fillRect(30, 64, 6, 4);
+        }
+
+        ctx.restore();
+      }
+
+      render() {
+        const { ctx, canvas } = this;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#061310';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const roadX = canvas.width * 0.22;
+        const roadW = canvas.width * 0.56;
+        ctx.fillStyle = '#111520';
+        ctx.fillRect(roadX, 0, roadW, canvas.height);
+
+        ctx.strokeStyle = '#00f2fe';
+        ctx.setLineDash([20, 20]);
+        ctx.lineDashOffset = -this.roadOffset;
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+        ctx.moveTo(roadX + roadW / 3, 0);
+        ctx.lineTo(roadX + roadW / 3, canvas.height);
+        ctx.moveTo(roadX + (roadW * 2) / 3, 0);
+        ctx.lineTo(roadX + (roadW * 2) / 3, canvas.height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#00f2fe';
+        ctx.strokeStyle = '#00f2fe';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(roadX, 0, roadW, canvas.height);
+        ctx.shadowBlur = 0;
+
+        this.drawCarAvatar(this.playerX, this.playerY, '#00f2fe', true);
+        this.enemies.forEach(e => this.drawCarAvatar(e.x, e.y, e.color, false));
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       GAME 2: SNAKE GAME
+       ------------------------------------------------------------------------- */
+    class SnakeGame {
+      constructor(canvas, ctx) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.gridSize = 20;
+        this.cols = Math.floor(canvas.width / this.gridSize);
+        this.rows = Math.floor(canvas.height / this.gridSize);
+        this.snake = [{ x: 5, y: 5 }, { x: 4, y: 5 }, { x: 3, y: 5 }];
+        this.dir = { x: 1, y: 0 };
+        this.nextDir = { x: 1, y: 0 };
+        this.food = this.spawnFood();
+        this.score = 0;
+        this.gameOver = false;
+        this.stepTimer = 0;
+        this.speed = 0.11;
+      }
+
+      spawnFood() {
+        return {
+          x: Math.floor(Math.random() * this.cols),
+          y: Math.floor(Math.random() * this.rows)
+        };
+      }
+
+      update(dt) {
+        if (this.gameOver) return;
+
+        if ((Input.up || Input.joystickVector.y < -0.3) && this.dir.y === 0) this.nextDir = { x: 0, y: -1 };
+        if ((Input.down || Input.joystickVector.y > 0.3) && this.dir.y === 0) this.nextDir = { x: 0, y: 1 };
+        if ((Input.left || Input.joystickVector.x < -0.3) && this.dir.x === 0) this.nextDir = { x: -1, y: 0 };
+        if ((Input.right || Input.joystickVector.x > 0.3) && this.dir.x === 0) this.nextDir = { x: 1, y: 0 };
+
+        this.stepTimer += dt;
+        if (this.stepTimer >= (Input.actionA ? this.speed / 2 : this.speed)) {
+          this.stepTimer = 0;
+          this.dir = { ...this.nextDir };
+
+          const head = { x: this.snake[0].x + this.dir.x, y: this.snake[0].y + this.dir.y };
+
+          if (head.x < 0 || head.x >= this.cols || head.y < 0 || head.y >= this.rows) {
+            this.gameOver = true;
+            app.triggerGameOver(this.score);
+            return;
+          }
+
+          for (let segment of this.snake) {
+            if (head.x === segment.x && head.y === segment.y) {
+              this.gameOver = true;
+              app.triggerGameOver(this.score);
+              return;
+            }
+          }
+
+          this.snake.unshift(head);
+
+          if (head.x === this.food.x && head.y === this.food.y) {
+            this.score += 10;
+            sound.playScore();
+            app.updateScore(this.score);
+            this.food = this.spawnFood();
+          } else {
+            this.snake.pop();
+          }
+        }
+      }
+
+      render() {
+        const { ctx, canvas } = this;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = '#141824';
+        ctx.lineWidth = 1;
+        for (let c = 0; c < this.cols; c++) {
+          ctx.beginPath();
+          ctx.moveTo(c * this.gridSize, 0);
+          ctx.lineTo(c * this.gridSize, canvas.height);
+          ctx.stroke();
+        }
+        for (let r = 0; r < this.rows; r++) {
+          ctx.beginPath();
+          ctx.moveTo(0, r * this.gridSize);
+          ctx.lineTo(canvas.width, r * this.gridSize);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = '#39ff14';
+        ctx.shadowColor = '#39ff14';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc((this.food.x + 0.5) * this.gridSize, (this.food.y + 0.5) * this.gridSize, this.gridSize / 2 - 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        this.snake.forEach((s, idx) => {
+          ctx.fillStyle = idx === 0 ? '#ffffff' : '#00f2fe';
+          ctx.shadowColor = '#00f2fe';
+          ctx.fillRect(s.x * this.gridSize + 1, s.y * this.gridSize + 1, this.gridSize - 2, this.gridSize - 2);
+        });
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       GAME 3: PING PONG GAME (Fixed ball trajectory rendering)
+       ------------------------------------------------------------------------- */
+    class PingPongGame {
+      constructor(canvas, ctx) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.gameOver = false;
+        this.score = 0;
+        this.paddleW = 90;
+        this.paddleH = 12;
+
+        this.playerX = canvas.width / 2 - this.paddleW / 2;
+        this.aiX = canvas.width / 2 - this.paddleW / 2;
+        
+        this.ball = {
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: (Math.random() > 0.5 ? 1 : -1) * 220,
+          vy: 220,
+          radius: 8
+        };
+      }
+
+      update(dt) {
+        if (this.gameOver) return;
+
+        const speed = 380;
+        if (Input.left) this.playerX -= speed * dt;
+        if (Input.right) this.playerX += speed * dt;
+        this.playerX = Math.max(0, Math.min(this.canvas.width - this.paddleW, this.playerX));
+
+        const targetAI = this.ball.x - this.paddleW / 2;
+        this.aiX += (targetAI - this.aiX) * 4.5 * dt;
+        this.aiX = Math.max(0, Math.min(this.canvas.width - this.paddleW, this.aiX));
+
+        this.ball.x += this.ball.vx * dt;
+        this.ball.y += this.ball.vy * dt;
+
+        if (this.ball.x - this.ball.radius < 0 || this.ball.x + this.ball.radius > this.canvas.width) {
+          this.ball.vx *= -1;
+          sound.playClick();
+        }
+
+        const playerTop = this.canvas.height - 30;
+        if (
+          this.ball.vy > 0 &&
+          this.ball.y + this.ball.radius >= playerTop &&
+          this.ball.y - this.ball.radius <= playerTop + this.paddleH &&
+          this.ball.x >= this.playerX &&
+          this.ball.x <= this.playerX + this.paddleW
+        ) {
+          this.ball.vy *= -1.05;
+          this.ball.vx *= 1.05;
+          this.score += 10;
+          sound.playScore();
+          app.updateScore(this.score);
+        }
+
+        const aiBottom = 30 + this.paddleH;
+        if (
+          this.ball.vy < 0 &&
+          this.ball.y - this.ball.radius <= aiBottom &&
+          this.ball.y + this.ball.radius >= 30 &&
+          this.ball.x >= this.aiX &&
+          this.ball.x <= this.aiX + this.paddleW
+        ) {
+          this.ball.vy *= -1.05;
+          this.ball.vx *= 1.05;
+          sound.playClick();
+        }
+
+        if (this.ball.y > this.canvas.height) {
+          this.gameOver = true;
+          app.triggerGameOver(this.score);
+        }
+
+        if (this.ball.y < 0) {
+          this.score += 50;
+          sound.playWin();
+          app.updateScore(this.score);
+          this.ball.x = this.canvas.width / 2;
+          this.ball.y = this.canvas.height / 2;
+          this.ball.vy = 220;
+        }
+      }
+
+      render() {
+        const { ctx, canvas } = this;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = '#232938';
+        ctx.setLineDash([10, 10]);
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height / 2);
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#ff007f';
+        ctx.shadowColor = '#ff007f';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(this.aiX, 30, this.paddleW, this.paddleH);
+
+        ctx.fillStyle = '#00f2fe';
+        ctx.shadowColor = '#00f2fe';
+        ctx.fillRect(this.playerX, canvas.height - 30, this.paddleW, this.paddleH);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(this.ball.x, this.ball.y, this.ball.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       GAME 4: MAZE GAME
+       ------------------------------------------------------------------------- */
+    class MazeGame {
+      constructor(canvas, ctx) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.gameOver = false;
+        this.score = 0;
+        this.cols = 13;
+        this.rows = 9;
+        this.cellW = canvas.width / this.cols;
+        this.cellH = canvas.height / this.rows;
+        this.player = { x: 0, y: 0 };
+        this.goal = { x: this.cols - 1, y: this.rows - 1 };
+        this.maze = this.generateMaze();
+        this.moveCooldown = 0;
+      }
+
+      generateMaze() {
+        const grid = Array(this.rows).fill(0).map(() => Array(this.cols).fill(0));
+        for (let r = 0; r < this.rows; r++) {
+          for (let c = 0; c < this.cols; c++) {
+            if (Math.random() < 0.25 && !(c === 0 && r === 0) && !(c === this.cols-1 && r === this.rows-1)) {
+              grid[r][c] = 1;
+            }
+          }
+        }
+        grid[0][0] = 0;
+        grid[this.rows - 1][this.cols - 1] = 0;
+        return grid;
+      }
+
+      update(dt) {
+        if (this.gameOver) return;
+        this.moveCooldown -= dt;
+
+        if (this.moveCooldown <= 0) {
+          let dx = 0, dy = 0;
+          if (Input.left || Input.joystickVector.x < -0.3) dx = -1;
+          else if (Input.right || Input.joystickVector.x > 0.3) dx = 1;
+          else if (Input.up || Input.joystickVector.y < -0.3) dy = -1;
+          else if (Input.down || Input.joystickVector.y > 0.3) dy = 1;
+
+          if (dx !== 0 || dy !== 0) {
+            const nx = this.player.x + dx;
+            const ny = this.player.y + dy;
+
+            if (nx >= 0 && nx < this.cols && ny >= 0 && ny < this.rows && this.maze[ny][nx] === 0) {
+              this.player.x = nx;
+              this.player.y = ny;
+              sound.playClick();
+              this.moveCooldown = 0.14;
+
+              if (this.player.x === this.goal.x && this.player.y === this.goal.y) {
+                this.score += 100;
+                sound.playWin();
+                app.updateScore(this.score);
+                this.maze = this.generateMaze();
+                this.player = { x: 0, y: 0 };
+              }
+            }
+          }
+        }
+      }
+
+      render() {
+        const { ctx, canvas } = this;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let r = 0; r < this.rows; r++) {
+          for (let c = 0; c < this.cols; c++) {
+            if (this.maze[r][c] === 1) {
+              ctx.fillStyle = '#232938';
+              ctx.fillRect(c * this.cellW + 2, r * this.cellH + 2, this.cellW - 4, this.cellH - 4);
+            }
+          }
+        }
+
+        ctx.fillStyle = '#39ff14';
+        ctx.shadowColor = '#39ff14';
+        ctx.shadowBlur = 15;
+        ctx.fillRect(this.goal.x * this.cellW + 6, this.goal.y * this.cellH + 6, this.cellW - 12, this.cellH - 12);
+
+        ctx.fillStyle = '#00f2fe';
+        ctx.shadowColor = '#00f2fe';
+        ctx.beginPath();
+        ctx.arc((this.player.x + 0.5) * this.cellW, (this.player.y + 0.5) * this.cellH, Math.min(this.cellW, this.cellH) / 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       GAME 5: SHOOTING GAME (Miss counter up to 100, gradual speed scaling)
+       ------------------------------------------------------------------------- */
+    class ShootingGame {
+      constructor(canvas, ctx) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.gameOver = false;
+        this.score = 0;
+        this.missedCount = 0;
+        this.maxMisses = 100;
+        this.shipX = canvas.width / 2;
+        this.shipY = canvas.height - 45;
+        this.bullets = [];
+        this.enemies = [];
+        this.shootCooldown = 0;
+        this.spawnTimer = 0;
+        this.elapsedTime = 0;
+      }
+
+      update(dt) {
+        if (this.gameOver) return;
+        this.elapsedTime += dt;
+
+        const speed = 340;
+        if (Input.left) this.shipX -= speed * dt;
+        if (Input.right) this.shipX += speed * dt;
+        this.shipX = Math.max(20, Math.min(this.canvas.width - 20, this.shipX));
+
+        this.shootCooldown -= dt;
+        if ((Input.actionA || Input.up) && this.shootCooldown <= 0) {
+          this.bullets.push({ x: this.shipX, y: this.shipY - 20 });
+          sound.playShoot();
+          this.shootCooldown = 0.16;
+        }
+
+        for (let i = this.bullets.length - 1; i >= 0; i--) {
+          this.bullets[i].y -= 480 * dt;
+          if (this.bullets[i].y < 0) {
+            this.bullets.splice(i, 1);
+            this.missedCount++;
+            if (this.missedCount >= this.maxMisses) {
+              this.gameOver = true;
+              app.triggerGameOver(this.score);
+              return;
+            }
+          }
+        }
+
+        this.spawnTimer += dt;
+        const currentSpawnInterval = Math.max(0.35, 0.85 - (this.elapsedTime * 0.015));
+        if (this.spawnTimer > currentSpawnInterval) {
+          this.spawnTimer = 0;
+          const currentEnemySpeed = 100 + (this.elapsedTime * 4);
+          this.enemies.push({
+            x: 30 + Math.random() * (this.canvas.width - 60),
+            y: -25,
+            speed: currentEnemySpeed + Math.random() * 50
+          });
+        }
+
+        for (let eIdx = this.enemies.length - 1; eIdx >= 0; eIdx--) {
+          const e = this.enemies[eIdx];
+          e.y += e.speed * dt;
+
+          if (e.y > this.canvas.height - 25) {
+            this.gameOver = true;
+            app.triggerGameOver(this.score);
+            return;
+          }
+
+          for (let bIdx = this.bullets.length - 1; bIdx >= 0; bIdx--) {
+            const b = this.bullets[bIdx];
+            const dist = Math.hypot(b.x - e.x, b.y - e.y);
+            if (dist < 22) {
+              this.enemies.splice(eIdx, 1);
+              this.bullets.splice(bIdx, 1);
+              this.score += 20;
+              sound.playScore();
+              app.updateScore(this.score);
+              break;
+            }
+          }
+        }
+      }
+
+      render() {
+        const { ctx, canvas } = this;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Display Miss Counter on canvas top right
+        ctx.fillStyle = '#ff007f';
+        ctx.font = 'bold 12px Orbitron';
+        ctx.textAlign = 'right';
+        ctx.fillText(`MISSES: ${this.missedCount} / ${this.maxMisses}`, canvas.width - 15, 25);
+
+        ctx.save();
+        ctx.translate(this.shipX, this.shipY);
+
+        ctx.fillStyle = '#ff007f';
+        ctx.beginPath();
+        ctx.moveTo(-6, 12);
+        ctx.lineTo(0, 22 + Math.random() * 6);
+        ctx.lineTo(6, 12);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#00f2fe';
+        ctx.shadowColor = '#00f2fe';
+        ctx.shadowBlur = 12;
+
+        ctx.beginPath();
+        ctx.moveTo(0, -22);
+        ctx.lineTo(16, 12);
+        ctx.lineTo(6, 8);
+        ctx.lineTo(-6, 8);
+        ctx.lineTo(-16, 12);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, -4, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle = '#39ff14';
+        ctx.shadowColor = '#39ff14';
+        this.bullets.forEach(b => {
+          ctx.fillRect(b.x - 2, b.y, 4, 12);
+        });
+
+        ctx.fillStyle = '#ff007f';
+        ctx.shadowColor = '#ff007f';
+        this.enemies.forEach(e => {
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, 14, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       GAME 6: JUMP GAME
+       ------------------------------------------------------------------------- */
+    class JumpGame {
+      constructor(canvas, ctx) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.gameOver = false;
+        this.score = 0;
+        this.player = {
+          x: canvas.width / 2,
+          y: canvas.height - 100,
+          vx: 0,
+          vy: -420,
+          radius: 12
+        };
+        this.platforms = [];
+        this.generateInitialPlatforms();
+      }
+
+      generateInitialPlatforms() {
+        for (let i = 0; i < 7; i++) {
+          this.platforms.push({
+            x: Math.random() * (this.canvas.width - 70),
+            y: this.canvas.height - (i * 70) - 40,
+            w: 70,
+            h: 12
+          });
+        }
+      }
+
+      update(dt) {
+        if (this.gameOver) return;
+
+        if (Input.left || Input.joystickVector.x < -0.3) this.player.vx = -260;
+        else if (Input.right || Input.joystickVector.x > 0.3) this.player.vx = 260;
+        else this.player.vx = 0;
+
+        this.player.x += this.player.vx * dt;
+        if (this.player.x < 0) this.player.x = this.canvas.width;
+        if (this.player.x > this.canvas.width) this.player.x = 0;
+
+        this.player.vy += 720 * dt;
+        this.player.y += this.player.vy * dt;
+
+        if (this.player.y < this.canvas.height / 2) {
+          const diff = (this.canvas.height / 2) - this.player.y;
+          this.player.y = this.canvas.height / 2;
+          this.score += Math.floor(diff);
+          app.updateScore(this.score);
+
+          this.platforms.forEach(p => {
+            p.y += diff;
+            if (p.y > this.canvas.height) {
+              p.y = 0;
+              p.x = Math.random() * (this.canvas.width - 70);
+            }
+          });
+        }
+
+        if (this.player.vy > 0) {
+          this.platforms.forEach(p => {
+            if (
+              this.player.x >= p.x &&
+              this.player.x <= p.x + p.w &&
+              this.player.y + this.player.radius >= p.y &&
+              this.player.y + this.player.radius <= p.y + p.h
+            ) {
+              this.player.vy = -460;
+              sound.playJump();
+            }
+          });
+        }
+
+        if (this.player.y > this.canvas.height) {
+          this.gameOver = true;
+          app.triggerGameOver(this.score);
+        }
+      }
+
+      render() {
+        const { ctx, canvas } = this;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#39ff14';
+        ctx.shadowColor = '#39ff14';
+        ctx.shadowBlur = 8;
+        this.platforms.forEach(p => {
+          ctx.fillRect(p.x, p.y, p.w, p.h);
+        });
+
+        ctx.fillStyle = '#00f2fe';
+        ctx.shadowColor = '#00f2fe';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(this.player.x, this.player.y, this.player.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       GAME 7: 2048 PUZZLE GAME
+       ------------------------------------------------------------------------- */
+    class Puzzle2048Game {
+      constructor(canvas, ctx) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.gameOver = false;
+        this.score = 0;
+        this.grid = Array(4).fill(0).map(() => Array(4).fill(0));
+        this.moveCooldown = 0;
+        this.addTile();
+        this.addTile();
+      }
+
+      addTile() {
+        const empty = [];
+        for (let r = 0; r < 4; r++) {
+          for (let c = 0; c < 4; c++) {
+            if (this.grid[r][c] === 0) empty.push({ r, c });
+          }
+        }
+        if (empty.length > 0) {
+          const spot = empty[Math.floor(Math.random() * empty.length)];
+          this.grid[spot.r][spot.c] = Math.random() > 0.1 ? 2 : 4;
+        }
+      }
+
+      update(dt) {
+        if (this.gameOver) return;
+        this.moveCooldown -= dt;
+
+        if (this.moveCooldown <= 0) {
+          let moved = false;
+          if (Input.left) moved = this.slideLeft();
+          else if (Input.right) moved = this.slideRight();
+          else if (Input.up) moved = this.slideUp();
+          else if (Input.down) moved = this.slideDown();
+
+          if (moved) {
+            sound.playScore();
+            this.addTile();
+            app.updateScore(this.score);
+            this.moveCooldown = 0.22;
+          }
+        }
+      }
+
+      slideLeft() {
+        let moved = false;
+        for (let r = 0; r < 4; r++) {
+          let row = this.grid[r].filter(v => v !== 0);
+          for (let i = 0; i < row.length - 1; i++) {
+            if (row[i] === row[i + 1]) {
+              row[i] *= 2;
+              this.score += row[i];
+              row.splice(i + 1, 1);
+              moved = true;
+            }
+          }
+          while (row.length < 4) row.push(0);
+          if (row.some((v, idx) => v !== this.grid[r][idx])) moved = true;
+          this.grid[r] = row;
+        }
+        return moved;
+      }
+
+      slideRight() {
+        for (let r = 0; r < 4; r++) this.grid[r].reverse();
+        const moved = this.slideLeft();
+        for (let r = 0; r < 4; r++) this.grid[r].reverse();
+        return moved;
+      }
+
+      slideUp() {
+        this.transpose();
+        const moved = this.slideLeft();
+        this.transpose();
+        return moved;
+      }
+
+      slideDown() {
+        this.transpose();
+        const moved = this.slideRight();
+        this.transpose();
+        return moved;
+      }
+
+      transpose() {
+        for (let r = 0; r < 4; r++) {
+          for (let c = r + 1; c < 4; c++) {
+            [this.grid[r][c], this.grid[c][r]] = [this.grid[c][r], this.grid[r][c]];
+          }
+        }
+      }
+
+      render() {
+        const { ctx, canvas } = this;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const size = Math.min(canvas.width, canvas.height) * 0.85;
+        const startX = (canvas.width - size) / 2;
+        const startY = (canvas.height - size) / 2;
+        const cell = size / 4;
+
+        ctx.fillStyle = '#131722';
+        ctx.fillRect(startX, startY, size, size);
+
+        for (let r = 0; r < 4; r++) {
+          for (let c = 0; c < 4; c++) {
+            const val = this.grid[r][c];
+            const x = startX + c * cell + 4;
+            const y = startY + r * cell + 4;
+            const w = cell - 8;
+
+            ctx.fillStyle = val === 0 ? '#1b202e' : '#232938';
+            ctx.fillRect(x, y, w, w);
+
+            if (val > 0) {
+              ctx.fillStyle = val > 64 ? '#ff007f' : '#00f2fe';
+              ctx.shadowColor = ctx.fillStyle;
+              ctx.shadowBlur = 8;
+              ctx.font = 'bold 20px Orbitron';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(val, x + w / 2, y + w / 2);
+              ctx.shadowBlur = 0;
+            }
+          }
+        }
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       GAME 8: STICK HERO GAME
+       ------------------------------------------------------------------------- */
+    class StickHeroGame {
+      constructor(canvas, ctx) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.gameOver = false;
+        this.score = 0;
+        this.state = 'IDLE';
+        this.stickLength = 0;
+
+        this.platforms = [
+          { x: 30, w: 70 },
+          { x: 180 + Math.random() * 100, w: 50 + Math.random() * 40 }
+        ];
+        this.heroX = this.platforms[0].x + this.platforms[0].w - 15;
+      }
+
+      update(dt) {
+        if (this.gameOver) return;
+
+        if (this.state === 'IDLE') {
+          if (Input.actionA || Input.up) {
+            this.state = 'GROWING';
+            this.stickLength = 0;
+          }
+        } else if (this.state === 'GROWING') {
+          this.stickLength += 180 * dt;
+          if (!Input.actionA && !Input.up) {
+            this.state = 'WALKING';
+            sound.playJump();
+          }
+        } else if (this.state === 'WALKING') {
+          this.heroX += 140 * dt;
+          const p1 = this.platforms[0];
+          const p2 = this.platforms[1];
+          const targetX = p1.x + p1.w + this.stickLength;
+
+          if (this.heroX >= targetX) {
+            this.heroX = targetX;
+            if (targetX >= p2.x && targetX <= p2.x + p2.w) {
+              sound.playWin();
+              this.score += 10;
+              app.updateScore(this.score);
+              this.platforms.shift();
+              this.platforms.push({
+                x: p2.x + p2.w + 60 + Math.random() * 120,
+                w: 40 + Math.random() * 50
+              });
+              this.heroX = p2.x + p2.w - 15;
+              this.state = 'IDLE';
+            } else {
+              this.gameOver = true;
+              app.triggerGameOver(this.score);
+            }
+          }
+        }
+      }
+
+      render() {
+        const { ctx, canvas } = this;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const groundY = canvas.height - 80;
+
+        ctx.fillStyle = '#232938';
+        this.platforms.forEach(p => {
+          ctx.fillRect(p.x, groundY, p.w, 80);
+        });
+
+        if (this.stickLength > 0) {
+          ctx.strokeStyle = '#00f2fe';
+          ctx.shadowColor = '#00f2fe';
+          ctx.shadowBlur = 8;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          const startX = this.platforms[0].x + this.platforms[0].w;
+          ctx.moveTo(startX, groundY);
+
+          if (this.state === 'GROWING') {
+            ctx.lineTo(startX, groundY - this.stickLength);
+          } else {
+            ctx.lineTo(startX + this.stickLength, groundY);
+          }
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+
+        ctx.fillStyle = '#ff007f';
+        ctx.shadowColor = '#ff007f';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(this.heroX, groundY - 20, 15, 20);
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       GAME 9: BRICK BREAKER GAME
+       ------------------------------------------------------------------------- */
+    class BrickBreakerGame {
+      constructor(canvas, ctx) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.gameOver = false;
+        this.score = 0;
+        this.paddleW = 90;
+        this.paddleX = canvas.width / 2 - 45;
+
+        this.ball = {
+          x: canvas.width / 2,
+          y: canvas.height - 50,
+          vx: 190,
+          vy: -210,
+          r: 7
+        };
+
+        this.bricks = [];
+        this.rows = 4;
+        this.cols = 7;
+        this.bWidth = (canvas.width - 40) / this.cols;
+        this.bHeight = 18;
+
+        for (let r = 0; r < this.rows; r++) {
+          for (let c = 0; c < this.cols; c++) {
+            this.bricks.push({
+              x: 20 + c * this.bWidth,
+              y: 40 + r * (this.bHeight + 6),
+              status: 1
+            });
+          }
+        }
+      }
+
+      update(dt) {
+        if (this.gameOver) return;
+
+        const speed = 380;
+        if (Input.left) this.paddleX -= speed * dt;
+        if (Input.right) this.paddleX += speed * dt;
+        this.paddleX = Math.max(0, Math.min(this.canvas.width - this.paddleW, this.paddleX));
+
+        this.ball.x += this.ball.vx * dt;
+        this.ball.y += this.ball.vy * dt;
+
+        if (this.ball.x - this.ball.r < 0 || this.ball.x + this.ball.r > this.canvas.width) {
+          this.ball.vx *= -1;
+          sound.playClick();
+        }
+        if (this.ball.y - this.ball.r < 0) {
+          this.ball.vy *= -1;
+          sound.playClick();
+        }
+
+        const pY = this.canvas.height - 30;
+        if (
+          this.ball.vy > 0 &&
+          this.ball.y + this.ball.r >= pY &&
+          this.ball.x >= this.paddleX &&
+          this.ball.x <= this.paddleX + this.paddleW
+        ) {
+          this.ball.vy *= -1;
+          sound.playClick();
+        }
+
+        this.bricks.forEach(b => {
+          if (b.status === 1) {
+            if (
+              this.ball.x > b.x &&
+              this.ball.x < b.x + this.bWidth &&
+              this.ball.y > b.y &&
+              this.ball.y < b.y + this.bHeight
+            ) {
+              this.ball.vy *= -1;
+              b.status = 0;
+              this.score += 15;
+              sound.playScore();
+              app.updateScore(this.score);
+            }
+          }
+        });
+
+        if (this.ball.y > this.canvas.height) {
+          this.gameOver = true;
+          app.triggerGameOver(this.score);
+        }
+      }
+
+      render() {
+        const { ctx, canvas } = this;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        this.bricks.forEach((b, idx) => {
+          if (b.status === 1) {
+            ctx.fillStyle = idx % 2 === 0 ? '#ff007f' : '#00f2fe';
+            ctx.shadowColor = ctx.fillStyle;
+            ctx.shadowBlur = 6;
+            ctx.fillRect(b.x + 2, b.y + 2, this.bWidth - 4, this.bHeight - 4);
+          }
+        });
+
+        ctx.fillStyle = '#39ff14';
+        ctx.shadowColor = '#39ff14';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(this.paddleX, canvas.height - 30, this.paddleW, 10);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(this.ball.x, this.ball.y, this.ball.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       GAME 10: ENDLESS RUNNER GAME (Single Action Button)
+       ------------------------------------------------------------------------- */
+    class EndlessRunnerGame {
+      constructor(canvas, ctx) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.gameOver = false;
+        this.score = 0;
+        this.groundY = canvas.height - 50;
+        this.animTimer = 0;
+
+        this.player = {
+          x: 70,
+          y: this.groundY - 45,
+          vy: 0,
+          h: 45
+        };
+
+        this.obstacles = [];
+        this.spawnTimer = 0;
+        this.speed = 300;
+      }
+
+      update(dt) {
+        if (this.gameOver) return;
+        this.animTimer += dt * 12;
+
+        // Jump (Up Arrow / Space / Action A)
+        if ((Input.actionA || Input.up) && this.player.y >= this.groundY - this.player.h) {
+          this.player.vy = -450;
+          sound.playJump();
+        }
+
+        this.player.vy += 1050 * dt;
+        this.player.y += this.player.vy * dt;
+
+        if (this.player.y >= this.groundY - this.player.h) {
+          this.player.y = this.groundY - this.player.h;
+          this.player.vy = 0;
+        }
+
+        this.score += Math.floor(12 * dt);
+        app.updateScore(this.score);
+
+        this.spawnTimer += dt;
+        if (this.spawnTimer > 1.4) {
+          this.spawnTimer = 0;
+          this.obstacles.push({
+            x: this.canvas.width + 20,
+            y: this.groundY - 28,
+            w: 22,
+            h: 28
+          });
+        }
+
+        for (let i = this.obstacles.length - 1; i >= 0; i--) {
+          const obs = this.obstacles[i];
+          obs.x -= this.speed * dt;
+
+          if (
+            this.player.x < obs.x + obs.w &&
+            this.player.x + 22 > obs.x &&
+            this.player.y < obs.y + obs.h &&
+            this.player.y + this.player.h > obs.y
+          ) {
+            this.gameOver = true;
+            app.triggerGameOver(this.score);
+            return;
+          }
+
+          if (obs.x < -30) this.obstacles.splice(i, 1);
+        }
+      }
+
+      drawHumanAvatar(x, y) {
+        const { ctx } = this;
+        ctx.save();
+        ctx.translate(x, y);
+
+        ctx.strokeStyle = '#00f2fe';
+        ctx.fillStyle = '#00f2fe';
+        ctx.shadowColor = '#00f2fe';
+        ctx.shadowBlur = 10;
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+
+        const frame = Math.sin(this.animTimer);
+
+        ctx.beginPath();
+        ctx.arc(10, 8, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(10, 14);
+        ctx.lineTo(10, 28);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(10, 18);
+        ctx.lineTo(10 + frame * 10, 24);
+        ctx.moveTo(10, 18);
+        ctx.lineTo(10 - frame * 10, 24);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(10, 28);
+        ctx.lineTo(10 - frame * 12, 42);
+        ctx.moveTo(10, 28);
+        ctx.lineTo(10 + frame * 12, 42);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      render() {
+        const { ctx, canvas } = this;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = '#232938';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0, this.groundY);
+        ctx.lineTo(canvas.width, this.groundY);
+        ctx.stroke();
+
+        this.drawHumanAvatar(this.player.x, this.player.y);
+
+        ctx.fillStyle = '#ff007f';
+        ctx.shadowColor = '#ff007f';
+        ctx.shadowBlur = 8;
+        this.obstacles.forEach(o => {
+          ctx.fillRect(o.x, o.y, o.w, o.h);
+        });
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    /* =========================================================================
+       6. BOOTSTRAP APPLICATION
+       ========================================================================= */
+    let app = null;
+    window.onload = function() {
+      app = new AppController();
+      app.init();
+    };
+  </script>
+</body>
+</html>
